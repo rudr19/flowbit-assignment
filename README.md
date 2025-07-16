@@ -213,9 +213,11 @@ npm run lint
 - **API Design**: RESTful endpoints with proper error handling
 
 ---
+
 Thank you for reviewing my submission — I look forward to the opportunity to join the Flowbit team!
 
 Best regards,  
-**Rudra Kumar Pandey**
+Rudra Kumar Pandey
 rudrakumarpandey47@gmail.com
+
 ---
