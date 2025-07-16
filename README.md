@@ -212,4 +212,8 @@ npm run lint
 - **Workflow Automation**: Scalable n8n integration
 - **API Design**: RESTful endpoints with proper error handling
 
+
+Thank you for reviewing my submission — I look forward to the opportunity to join the Flowbit team!
+
+
 ---
