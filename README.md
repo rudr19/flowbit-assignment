@@ -216,6 +216,6 @@ npm run lint
 Thank you for reviewing my submission — I look forward to the opportunity to join the Flowbit team!
 
 Best regards,  
-*Rudra Kumar Pandey* 
-*rudrakumarpandey47@gmail.com*
+**Rudra Kumar Pandey**
+rudrakumarpandey47@gmail.com
 ---
