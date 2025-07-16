@@ -1,0 +1,22 @@
+{
+  "LogisticsCo": {
+    "screens": [
+      {
+        "name": "Support Tickets",
+        "url": "/support",
+        "icon": "ticket",
+        "description": "Manage customer support tickets"
+      }
+    ]
+  },
+  "RetailGmbH": {
+    "screens": [
+      {
+        "name": "Support Tickets",
+        "url": "/support",
+        "icon": "ticket",
+        "description": "Manage customer support tickets"
+      }
+    ]
+  }
+}

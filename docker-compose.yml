@@ -1,0 +1,130 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: flowbit-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: flowbit
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./seed-data:/docker-entrypoint-initdb.d
+      - mongodb_data:/data/db
+    networks:
+      - flowbit-network
+
+  api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: flowbit-api
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongodb
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DB_URL=mongodb://admin:password@mongodb:27017/flowbit?authSource=admin
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - WEBHOOK_SECRET=webhook-secret-key-for-n8n
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook/ticket-process
+      - FLOWBIT_WEBHOOK_URL=http://api:3001
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - flowbit-network
+
+  shell:
+    build:
+      context: ./frontend/shell
+      dockerfile: Dockerfile
+    container_name: flowbit-shell
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://api:3001
+      - REACT_APP_SUPPORT_TICKETS_URL=http://localhost:3002
+    volumes:
+      - ./frontend/shell:/app
+      - /app/node_modules
+    networks:
+      - flowbit-network
+    depends_on:
+      - api
+      - support-tickets
+
+  support-tickets:
+    build:
+      context: ./frontend/support-tickets
+      dockerfile: Dockerfile
+    container_name: flowbit-support-tickets
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      - REACT_APP_API_URL=http://api:3001
+    volumes:
+      - ./frontend/support-tickets:/app
+      - /app/node_modules
+    networks:
+      - flowbit-network
+    depends_on:
+      - api
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: flowbit-n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=password
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://localhost:5678/
+      - FLOWBIT_WEBHOOK_URL=http://api:3001
+    volumes:
+      - ./n8n-data:/home/node/.n8n
+      - ./n8n-workflows:/home/node/.n8n/workflows
+    networks:
+      - flowbit-network
+    depends_on:
+      - api
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: flowbit-ngrok
+    restart: unless-stopped
+    ports:
+      - "4040:4040"
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN:-}
+    command: 
+      - "tunnel"
+      - "--label"
+      - "edge=edghts_..."
+      - "http://api:3001"
+    depends_on:
+      - api
+    networks:
+      - flowbit-network
+
+volumes:
+  mongodb_data:
+  n8n_data:
+
+networks:
+  flowbit-network:
+    driver: bridge
