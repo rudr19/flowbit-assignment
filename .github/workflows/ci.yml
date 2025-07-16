@@ -7,6 +7,16 @@ on:
 jobs:
   test-and-lint:
     runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:5.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongo --quiet --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js
@@ -24,5 +34,14 @@ jobs:
           if [ ! -f src/tests/setup.js ]; then
             echo "// Jest setup file" > src/tests/setup.js
           fi
+      - name: Create test environment file
+        run: |
+          cd backend
+          echo "MONGO_URI=mongodb://localhost:27017/flowbit-test" > .env.test
+          echo "NODE_ENV=test" >> .env.test
+          echo "PORT=3001" >> .env.test
       - name: Run Jest tests (backend)
         run: cd backend && npm test
+        env:
+          MONGO_URI: mongodb://localhost:27017/flowbit-test
+          NODE_ENV: test
