@@ -17,5 +17,12 @@ jobs:
         run: cd backend && npm install --legacy-peer-deps
       - name: Lint code (backend)
         run: cd backend && npm run lint || echo "Lint warnings found"
+      - name: Create Jest setup file if missing
+        run: |
+          cd backend
+          mkdir -p src/tests
+          if [ ! -f src/tests/setup.js ]; then
+            echo "// Jest setup file" > src/tests/setup.js
+          fi
       - name: Run Jest tests (backend)
         run: cd backend && npm test
